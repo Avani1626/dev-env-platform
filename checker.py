@@ -5,45 +5,13 @@ import argparse
 from datetime import datetime
 
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(
-        description="Check developer environment setup"
-    )
-
-    parser.add_argument(
-        "--no-report",
-        action="store_true",
-        help="Do not generate JSON report"
-    )
-
-    parser.add_argument(
-        "--only",
-        type=str,
-        help="Check only a specific tool (e.g. Python, Git)"
-    )
-
-    parser.add_argument(
-        "--list-tools",
-        action="store_true",
-        help="List supported tools and exit"
-    )
-
-    return parser.parse_args()
-
-
-
-
 def get_os():
-    """
-    Detect the operating system.
-    """
+    """Detect the operating system."""
     return platform.system()
 
 
 def check_tool(tool_name, version_command):
-    """
-    Check if a tool is installed and fetch its version.
-    """
+    """Check if a tool is installed and return its version."""
     try:
         result = subprocess.check_output(
             version_command,
@@ -56,7 +24,6 @@ def check_tool(tool_name, version_command):
             "installed": True,
             "version": result
         }
-
     except Exception:
         return {
             "installed": False,
@@ -65,9 +32,7 @@ def check_tool(tool_name, version_command):
 
 
 def generate_report(os_name, results):
-    """
-    Generate a JSON report of the environment check.
-    """
+    """Generate a JSON report for the environment check."""
     report = {
         "operating_system": os_name,
         "checked_at": datetime.now().isoformat(),
@@ -79,13 +44,39 @@ def generate_report(os_name, results):
 
     print("\n📄 Environment report saved as dev_env_report.json")
 
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="Developer Environment Checker"
+    )
+
+    parser.add_argument(
+        "--no-report",
+        action="store_true",
+        help="Do not generate JSON report"
+    )
+
+    parser.add_argument(
+        "--only",
+        type=str,
+        help="Check only a specific tool (Python, Git, Docker, Node)"
+    )
+
+    parser.add_argument(
+        "--list-tools",
+        action="store_true",
+        help="List supported tools and exit"
+    )
+
+    return parser.parse_args()
+
+
 TOOLS = {
     "Python": "python --version",
     "Git": "git --version",
     "Docker": "docker --version",
     "Node": "node --version"
 }
-
 
 
 def main():
@@ -95,7 +86,7 @@ def main():
 
     if args.list_tools:
         print("🧰 Supported tools:")
-        for tool in TOOLS.keys():
+        for tool in TOOLS:
             print(f"- {tool}")
         return
 
@@ -124,3 +115,7 @@ def main():
 
     if not args.no_report:
         generate_report(os_name, results)
+
+
+if __name__ == "__main__":
+    main()
