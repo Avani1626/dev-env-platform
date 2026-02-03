@@ -66,3 +66,9 @@ backend/
 
 🟢 Backend foundation complete  
 🟡 Data ingestion in progress
+
+### Day 3 — Scan Ingestion (Backend Becomes Functional)
+- Defined scan data contract using Pydantic models
+- Added `POST /scan` endpoint to accept environment scans
+- Implemented automatic request validation for nested scan data
+- Verified ingestion and validation using Swagger UI
