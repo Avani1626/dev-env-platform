@@ -72,3 +72,14 @@ backend/
 - Added `POST /scan` endpoint to accept environment scans
 - Implemented automatic request validation for nested scan data
 - Verified ingestion and validation using Swagger UI
+
+Day 4 — Scan Storage Preparation (Persistence Added)
+Introduced a service layer to handle scan persistence
+Designed an S3-ready local storage structure for raw scan data
+Implemented immutable, timestamp-based JSON storage for scans
+Connected the POST /scan endpoint to the storage service
+Ensured safe serialization of validated scan data (including datetime fields)
+Verified end-to-end flow: ingest → validate → persist
+
+
+
