@@ -81,5 +81,39 @@ Connected the POST /scan endpoint to the storage service
 Ensured safe serialization of validated scan data (including datetime fields)
 Verified end-to-end flow: ingest → validate → persist
 
-
+Day 5 – Backend Storage Integration & Scan Upload Flow
+🎯 Objective
+Integrate persistent storage into the FastAPI backend so validated developer environment scans can be saved reliably, with support for both local filesystem storage and AWS S3 — without changing API behavior.
+🧱 What Was Implemented
+FastAPI backend with a clean service-layer architecture
+Pydantic v2 models with strict request validation
+Storage abstraction layer:
+LocalStorage → saves scans as JSON files
+S3Storage → uploads scans directly to AWS S3
+Pluggable storage backend controlled via environment variable:
+STORAGE_BACKEND=local | s3
+Consistent object structure:
+scans/<developer_id>/<timestamp>.json
+☁️ AWS S3 Integration
+Created an S3 bucket for scan storage
+Configured a least-privilege IAM user with:
+s3:PutObject access to scans/*
+Used boto3 to upload JSON scan data
+Credentials loaded via environment variables (no hardcoding)
+🛠 Key Fixes & Learnings
+Fixed Python version issues by standardizing on Python 3.11
+Resolved circular imports and package resolution errors
+Enforced strict separation of:
+Application code (backend/app)
+Runtime data (storage/scans)
+Learned proper Pydantic v2 JSON serialization using:
+model_dump(mode="json")
+Debugged and fixed service ↔ storage method signature mismatches
+Handled datetime serialization safely using ISO 8601 strings
+✅ Current Status
+/health endpoint working
+/scan endpoint:
+Validates nested request schema
+Saves scan data successfully (local or S3)
+Backend is stable, cloud-ready, and extensible
 
