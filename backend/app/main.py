@@ -1,5 +1,10 @@
 from fastapi import FastAPI
-from app.models.scan import ScanRequest
+
+from backend.app.models.scan import ScanRequest
+from backend.app.services.scan_service import save_scan
+
+
+
 
 app = FastAPI()
 
@@ -10,9 +15,10 @@ def health_check():
 
 
 @app.post("/scan")
-def receive_scan(scan: ScanRequest):
+def ingest_scan(scan: ScanRequest):
+    result = save_scan(scan)
     return {
-        "message": "Scan received successfully",
-        "developer_id": scan.developer_id
+        "message": "Scan received and stored successfully",
+        "data": result
     }
 
