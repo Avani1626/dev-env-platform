@@ -117,3 +117,11 @@ Validates nested request schema
 Saves scan data successfully (local or S3)
 Backend is stable, cloud-ready, and extensible
 
+🟦 Day 6 — DynamoDB Scan Metadata Storage
+Designed a DynamoDB table to store scan summaries (metadata) using user_id as partition key and scan_id as sort key
+Implemented a dedicated DynamoDB storage layer to save and query scan metadata
+Stored lightweight fields like status (PASS/FAIL), OS, and timestamp for fast access
+Used Query (not Scan) to efficiently fetch scan history for a user
+Applied least-privilege IAM permissions for DynamoDB access
+Kept full scan data in S3/local while DynamoDB handles queryable summaries
+
