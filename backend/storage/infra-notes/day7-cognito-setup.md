@@ -8,3 +8,10 @@ Sign-in: Email
 Self registration: Enabled
 MFA: Disabled
 Return URL: http://localhost:3000
+
+## User Groups Created
+
+- admins → Can upload scans
+- users → Can only view scans
+
+Role-based access control will be enforced in FastAPI by checking "cognito:groups" from JWT.
