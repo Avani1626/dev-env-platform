@@ -1,0 +1,15 @@
+{
+  "developer_id": "avani.shinde",
+  "scan_time": "2026-02-03T12:45:00Z",
+  "system": {
+    "os": "Windows",
+    "os_version": "11",
+    "architecture": "x86_64"
+  },
+  "tools": [
+    {
+      "name": "Docker",
+      "version": "24.0"
+    }
+  ]
+}
