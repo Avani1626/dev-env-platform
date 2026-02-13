@@ -125,3 +125,13 @@ Used Query (not Scan) to efficiently fetch scan history for a user
 Applied least-privilege IAM permissions for DynamoDB access
 Kept full scan data in S3/local while DynamoDB handles queryable summaries
 
+Day 7 – AWS Cognito Authentication
+Created AWS Cognito User Pool for user management
+Configured Hosted UI with Authorization Code flow
+Generated access tokens using OAuth 2.0
+Integrated JWT verification in FastAPI backend
+Implemented RS256 signature validation using Cognito JWKS
+Verified token issuer, token_use=access, and client_id
+Protected /scan/history using HTTP Bearer authentication
+Enforced role-based access control using Cognito groups (admins)
+
