@@ -1,8 +1,8 @@
 from datetime import datetime
 import os
 
-from backend.app.storage.local import LocalStorage
-from backend.app.storage.s3 import S3Storage
+from app.storage.local import LocalStorage
+from app.storage.s3 import S3Storage
 
 
 class ScanService:

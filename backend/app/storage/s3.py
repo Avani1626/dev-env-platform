@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 import boto3
 
-from backend.app.storage.base import ScanStorage
+from app.storage.base import ScanStorage
 
 
 class S3Storage(ScanStorage):

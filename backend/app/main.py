@@ -3,11 +3,12 @@ from .auth import verify_token
 
 
 
-from fastapi import FastAPI
 
 
-from backend.app.models.scan import ScanRequest
-from backend.app.services.scan_service import ScanService
+
+from app.models.scan import ScanRequest
+
+from app.services.scan_service import ScanService
 
 app = FastAPI(title="Dev Env Platform")
 

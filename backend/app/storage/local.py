@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Dict, Any
 
-from backend.app.storage.base import ScanStorage
+from app.storage.base import ScanStorage
 
 
 class LocalStorage(ScanStorage):
