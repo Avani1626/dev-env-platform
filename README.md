@@ -135,3 +135,12 @@ Verified token issuer, token_use=access, and client_id
 Protected /scan/history using HTTP Bearer authentication
 Enforced role-based access control using Cognito groups (admins)
 
+
+Day 8 – Cognito PKCE + Secure Full-Stack Integration
+
+Implemented AWS Cognito OAuth2 Authorization Code Flow with PKCE in the React frontend for secure authentication.
+Integrated FastAPI backend with RS256 JWT verification using Cognito JWKS and validated issuer, token type, and client ID.
+Protected /scan/history endpoint to allow access only to authenticated users with valid access tokens.
+Connected frontend to backend using Bearer tokens and successfully displayed protected scan history in the UI.
+Added logout functionality and completed secure end-to-end authentication architecture.
+
