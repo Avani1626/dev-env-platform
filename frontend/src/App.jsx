@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 const COGNITO_DOMAIN =
   "https://devplatform123.auth.us-east-1.amazoncognito.com";
 
-
 const CLIENT_ID = "3ag53fg3iotu032h6tohf5c5pt";
 const REDIRECT_URI = "http://localhost:3000";
 
@@ -61,10 +60,7 @@ function App() {
         throw new Error("Token exchange failed");
       }
 
-      // Store token
       localStorage.setItem("access_token", data.access_token);
-
-      // Clean URL (remove ?code=...)
       window.history.replaceState({}, document.title, "/");
 
       setIsLoggedIn(true);
@@ -97,6 +93,8 @@ function App() {
       }
 
       const data = await response.json();
+      console.log("SCAN DATA:", data);
+
       setScans(data);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -135,14 +133,12 @@ function App() {
   // ---------------------------------------------------
   // 6️⃣ UI
   // ---------------------------------------------------
-  return (
+    return (
     <div style={{ padding: "40px", fontFamily: "Arial" }}>
       <h1>Dev Environment Platform</h1>
 
       {!isLoggedIn && (
-        <button onClick={handleLogin}>
-          Login
-        </button>
+        <button onClick={handleLogin}>Login</button>
       )}
 
       {isLoggedIn && (
@@ -164,18 +160,36 @@ function App() {
             <p>No scans found.</p>
           )}
 
-          <ul>
-            {scans.map((scan) => (
-              <li key={scan.id}>
-                <strong>{scan.filename}</strong> —{" "}
-                {scan.uploaded_at}
-              </li>
-            ))}
-          </ul>
+          {!loading && scans.length > 0 && (
+            <ul>
+              {scans.map((scan) => (
+                <li key={scan.scan_id} style={{ marginBottom: "15px" }}>
+                  <div>
+                    <strong>Date:</strong> {scan.timestamp}
+                  </div>
+                  <div>
+                    <strong>Status:</strong>{" "}
+                    <span
+                      style={{
+                        color:
+                          scan.status === "PASS" ? "green" : "red",
+                      }}
+                    >
+                      {scan.status}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>OS:</strong> {scan.os}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </>
       )}
     </div>
   );
-}
+  }
 
 export default App;
+
