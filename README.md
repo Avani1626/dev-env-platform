@@ -143,4 +143,10 @@ Integrated FastAPI backend with RS256 JWT verification using Cognito JWKS and va
 Protected /scan/history endpoint to allow access only to authenticated users with valid access tokens.
 Connected frontend to backend using Bearer tokens and successfully displayed protected scan history in the UI.
 Added logout functionality and completed secure end-to-end authentication architecture.
+Day 8 – React Authentication & Protected Dashboard
+Implemented AWS Cognito Hosted UI login using OAuth2 Authorization Code Flow with PKCE.
+Exchanged authorization code for access token and stored it securely in localStorage.
+Configured FastAPI backend to validate JWT tokens using Cognito JWKS (RS256).
+Added CORS middleware to enable secure frontend-backend communication.
+Successfully fetched and rendered protected scan history data in the React dashboard.
 
