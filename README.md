@@ -162,3 +162,11 @@ Implemented GET /scan/{scan_id} to retrieve full scan JSON securely per authenti
 Standardized storage layer (Local + S3) method signatures to eliminate 500 errors.
 Integrated frontend “View Details” button to display complete scan data.
 
+Day 10 – Scan Detail Page & UI Improvements
+
+Implemented a structured scan detail page replacing raw JSON with categorized UI sections (System, Python, Node, Docker, CLI Tools).
+Added multi-tool environment detection including Node.js, Docker, and common CLI tools (git, aws, java).
+Displayed installed vs missing tools clearly to improve environment visibility.
+Rendered Python and Node packages in structured tables for better readability.
+Enhanced overall frontend clarity to make the app feel production-ready and user-friendly.
+
