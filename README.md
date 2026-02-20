@@ -157,4 +157,8 @@ Integrated S3 to store full scan JSON and DynamoDB to store per-user scan metada
 Bound scan submissions to the authenticated user's sub instead of trusting frontend IDs.
 Fixed Windows filename issues caused by ISO timestamps.
 Successfully built a secure, end-to-end cloud-native scan workflow.
+🚀Full Scan Viewer & Debugging Fixes
+Implemented GET /scan/{scan_id} to retrieve full scan JSON securely per authenticated user.
+Standardized storage layer (Local + S3) method signatures to eliminate 500 errors.
+Integrated frontend “View Details” button to display complete scan data.
 
