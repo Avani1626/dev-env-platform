@@ -13,18 +13,22 @@ class ScanService:
         self.storage = S3Storage() if backend == "s3" else LocalStorage()
         self.dynamodb = DynamoDBStorage()
 
+    # ---------------------------------------------------
+    # Save Scan
+    # ---------------------------------------------------
     def save_scan(self, scan_data: dict):
         developer_id = scan_data["developer_id"]
 
-        # ✅ FIXED TIMESTAMP
+        # ✅ Safe timestamp for filenames
         timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
 
         scan_data["timestamp"] = timestamp
 
+        # Save full scan JSON (S3 or local)
         self.storage.save_scan(
-            developer_id=developer_id,
-            timestamp=timestamp,
-            data=scan_data,
+            user_id=developer_id,
+            scan_id=timestamp,
+            scan_data=scan_data,
         )
 
         environment = scan_data.get("environment", {})
@@ -37,6 +41,7 @@ class ScanService:
             "timestamp": timestamp,
         }
 
+        # Save metadata to DynamoDB
         self.dynamodb.save_scan_summary(
             user_id=developer_id,
             scan_id=scan_id,
@@ -44,3 +49,9 @@ class ScanService:
         )
 
         return {"message": "Scan saved successfully"}
+
+    # ---------------------------------------------------
+    # Get Full Scan (NEW)
+    # ---------------------------------------------------
+    def get_full_scan(self, user_id, scan_id):
+        return self.storage.get_scan(user_id, scan_id)

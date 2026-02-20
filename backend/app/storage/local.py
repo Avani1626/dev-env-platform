@@ -9,10 +9,28 @@ class LocalStorage(ScanStorage):
     def __init__(self, base_path: str = "storage/scans"):
         self.base_path = Path(base_path)
 
-    def save_scan(self, developer_id: str, timestamp: str, data: Dict[str, Any]) -> None:
-        developer_dir = self.base_path / developer_id
-        developer_dir.mkdir(parents=True, exist_ok=True)
+    # ---------------------------------------------------
+    # Save full scan locally
+    # ---------------------------------------------------
+    def save_scan(
+        self,
+        user_id: str,
+        scan_id: str,
+        scan_data: Dict[str, Any]
+    ) -> None:
+        user_dir = self.base_path / user_id
+        user_dir.mkdir(parents=True, exist_ok=True)
 
-        file_path = developer_dir / f"{timestamp}.json"
+        file_path = user_dir / f"{scan_id}.json"
+
         with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
+            json.dump(scan_data, f, indent=2)
+
+    # ---------------------------------------------------
+    # Get full scan locally
+    # ---------------------------------------------------
+    def get_scan(self, user_id: str, scan_id: str):
+        file_path = self.base_path / user_id / f"{scan_id}.json"
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            return json.load(f)

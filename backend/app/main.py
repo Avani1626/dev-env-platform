@@ -50,3 +50,9 @@ def submit_scan(payload: dict, current_user: dict = Depends(verify_token)):
     payload["developer_id"] = current_user["sub"]
 
     return scan_service.save_scan(payload)
+
+@app.get("/scan/{scan_id}")
+def get_scan(scan_id: str, current_user: dict = Depends(verify_token)):
+    user_id = current_user["sub"]
+    return scan_service.get_full_scan(user_id, scan_id)
+

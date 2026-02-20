@@ -14,9 +14,53 @@ function App() {
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedScan, setSelectedScan] = useState(null);
+
+  // ---------------------------------------
+  // Format Timestamp for UI
+  // ---------------------------------------
+  const formatDate = (ts) => {
+    if (!ts || ts.length !== 14) return ts;
+
+    const year = ts.slice(0, 4);
+    const month = ts.slice(4, 6);
+    const day = ts.slice(6, 8);
+    const hour = ts.slice(8, 10);
+    const min = ts.slice(10, 12);
+    const sec = ts.slice(12, 14);
+
+    return `${day}/${month}/${year} ${hour}:${min}:${sec}`;
+  };
 
   // ---------------------------------------------------
-  // 1️⃣ On Page Load: Check for auth code or token
+  // Fetch Full Scan Details
+  // ---------------------------------------------------
+  const fetchFullScan = async (scanId) => {
+    const token = localStorage.getItem("access_token");
+
+    try {
+      const response = await fetch(
+        `http://localhost:9100/scan/${scanId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch full scan");
+      }
+
+      const data = await response.json();
+      setSelectedScan(data);
+    } catch (err) {
+      console.error("Full scan fetch error:", err);
+    }
+  };
+
+  // ---------------------------------------------------
+  // On Page Load
   // ---------------------------------------------------
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -34,7 +78,7 @@ function App() {
   }, []);
 
   // ---------------------------------------------------
-  // 2️⃣ Exchange Authorization Code for Access Token
+  // Exchange Code for Token
   // ---------------------------------------------------
   const exchangeCodeForToken = async (code) => {
     try {
@@ -71,7 +115,7 @@ function App() {
   };
 
   // ---------------------------------------------------
-  // 3️⃣ Fetch Scan History From Backend
+  // Fetch Scan History
   // ---------------------------------------------------
   const fetchScans = async (token) => {
     setLoading(true);
@@ -79,7 +123,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/scan/history",
+        "http://localhost:9100/scan/history",
         {
           method: "GET",
           headers: {
@@ -93,8 +137,6 @@ function App() {
       }
 
       const data = await response.json();
-      console.log("SCAN DATA:", data);
-
       setScans(data);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -105,17 +147,18 @@ function App() {
   };
 
   // ---------------------------------------------------
-  // 4️⃣ Logout
+  // Logout
   // ---------------------------------------------------
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("code_verifier");
     setIsLoggedIn(false);
     setScans([]);
+    setSelectedScan(null);
   };
 
   // ---------------------------------------------------
-  // 5️⃣ Login Redirect
+  // Login Redirect
   // ---------------------------------------------------
   const handleLogin = () => {
     const loginUrl =
@@ -131,9 +174,9 @@ function App() {
   };
 
   // ---------------------------------------------------
-  // 6️⃣ UI
+  // UI
   // ---------------------------------------------------
-    return (
+  return (
     <div style={{ padding: "40px", fontFamily: "Arial" }}>
       <h1>Dev Environment Platform</h1>
 
@@ -153,7 +196,6 @@ function App() {
           <h2>Your Scan History</h2>
 
           {loading && <p>Loading scans...</p>}
-
           {error && <p style={{ color: "red" }}>{error}</p>}
 
           {!loading && scans.length === 0 && (
@@ -163,16 +205,19 @@ function App() {
           {!loading && scans.length > 0 && (
             <ul>
               {scans.map((scan) => (
-                <li key={scan.scan_id} style={{ marginBottom: "15px" }}>
+                <li key={scan.scan_id} style={{ marginBottom: "20px" }}>
                   <div>
-                    <strong>Date:</strong> {scan.timestamp}
+                    <strong>Date:</strong>{" "}
+                    {formatDate(scan.timestamp)}
                   </div>
                   <div>
                     <strong>Status:</strong>{" "}
                     <span
                       style={{
                         color:
-                          scan.status === "PASS" ? "green" : "red",
+                          scan.status === "PASS"
+                            ? "green"
+                            : "red",
                       }}
                     >
                       {scan.status}
@@ -181,15 +226,38 @@ function App() {
                   <div>
                     <strong>OS:</strong> {scan.os}
                   </div>
+
+                  <button
+                    onClick={() =>
+                      fetchFullScan(scan.scan_id)
+                    }
+                    style={{ marginTop: "8px" }}
+                  >
+                    View Details
+                  </button>
                 </li>
               ))}
             </ul>
+          )}
+
+          {selectedScan && (
+            <div style={{ marginTop: "40px" }}>
+              <h3>Full Scan Details</h3>
+              <pre
+                style={{
+                  background: "#f4f4f4",
+                  padding: "15px",
+                  overflowX: "auto",
+                }}
+              >
+                {JSON.stringify(selectedScan, null, 2)}
+              </pre>
+            </div>
           )}
         </>
       )}
     </div>
   );
-  }
+}
 
 export default App;
-
