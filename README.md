@@ -150,3 +150,11 @@ Configured FastAPI backend to validate JWT tokens using Cognito JWKS (RS256).
 Added CORS middleware to enable secure frontend-backend communication.
 Successfully fetched and rendered protected scan history data in the React dashboard.
 
+🚀 Day 9 – Authenticated Scan Pipeline
+
+Implemented JWT-based authentication using AWS Cognito to protect the /scan and /scan/history endpoints.
+Integrated S3 to store full scan JSON and DynamoDB to store per-user scan metadata.
+Bound scan submissions to the authenticated user's sub instead of trusting frontend IDs.
+Fixed Windows filename issues caused by ISO timestamps.
+Successfully built a secure, end-to-end cloud-native scan workflow.
+
