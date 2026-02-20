@@ -1,0 +1,17 @@
+{
+  "developer_id": "test-user-123",
+  "scan_time": "2026-02-20T07:17:51.815414",
+  "environment": {
+    "os": "Windows",
+    "os_version": "10.0.19045",
+    "python_version": "3.11.9"
+  },
+  "tools": [
+    {
+      "name": "python",
+      "version": "3.11.9"
+    }
+  ],
+  "metadata": {},
+  "timestamp": "20260220071751"
+}

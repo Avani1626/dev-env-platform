@@ -1,26 +1,30 @@
-import json
-import os
-from typing import Dict, Any
-
 import boto3
+import json
 
-from app.storage.base import ScanStorage
 
-
-class S3Storage(ScanStorage):
+class S3Storage:
     def __init__(self):
-        self.bucket_name = os.getenv("S3_BUCKET_NAME")
-        self.client = boto3.client("s3")
+        self.s3 = boto3.client("s3", region_name="us-east-1")
+        self.bucket_name = "dev-env-platform-scans-avani"
 
-    def save_scan(self, developer_id: str, timestamp: str, data: Dict[str, Any]) -> None:
-        if not self.bucket_name:
-            raise RuntimeError("S3_BUCKET_NAME environment variable not set")
+    def save_scan(self, user_id, scan_id, scan_data):
+        try:
+            key = f"{user_id}/{scan_id}.json"
 
-        key = f"scans/{developer_id}/{timestamp}.json"
+            print("---- S3 DEBUG START ----")
+            print("Bucket:", self.bucket_name)
+            print("Key:", key)
 
-        self.client.put_object(
-            Bucket=self.bucket_name,
-            Key=key,
-            Body=json.dumps(data, indent=2),
-            ContentType="application/json",
-        )
+            self.s3.put_object(
+                Bucket=self.bucket_name,
+                Key=key,
+                Body=json.dumps(scan_data, default=str),
+                ContentType="application/json"
+            )
+
+            print("S3 upload successful")
+            print("---- S3 DEBUG END ----")
+
+        except Exception as e:
+            print("🚨 S3 ERROR:", str(e))
+            raise

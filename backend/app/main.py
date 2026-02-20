@@ -1,9 +1,11 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from app.storage.dynamodb import DynamoDBStorage
 
 from .auth import verify_token
 from app.models.scan import ScanRequest
 from app.services.scan_service import ScanService
+from app.auth import verify_token
 
 
 app = FastAPI(title="Dev Env Platform")
@@ -25,20 +27,14 @@ scan_service = ScanService()
 
 @app.get("/scan/history")
 def get_scan_history(user=Depends(verify_token)):
-    return [
-        {
-            "scan_id": "scan001",
-            "timestamp": "2026-02-19",
-            "status": "PASS",
-            "os": "Windows"
-        },
-        {
-            "scan_id": "scan002",
-            "timestamp": "2026-02-18",
-            "status": "FAIL",
-            "os": "MacOS"
-        }
-    ]
+    user_id = user["sub"]
+
+    dynamodb = DynamoDBStorage()
+
+    items = dynamodb.get_scan_history(user_id)
+
+    return items
+
 
 
 def admin_required(user=Depends(verify_token)):
@@ -49,6 +45,8 @@ def admin_required(user=Depends(verify_token)):
 
 
 @app.post("/scan")
-def submit_scan(scan: ScanRequest):
-    payload = scan.model_dump(mode="json")
+def submit_scan(payload: dict, current_user: dict = Depends(verify_token)):
+    # Force developer_id from JWT
+    payload["developer_id"] = current_user["sub"]
+
     return scan_service.save_scan(payload)
