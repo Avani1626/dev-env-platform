@@ -32,9 +32,9 @@ function App() {
     return `${day}/${month}/${year} ${hour}:${min}:${sec}`;
   };
 
-  // ---------------------------------------------------
+  // ---------------------------------------
   // Fetch Full Scan Details
-  // ---------------------------------------------------
+  // ---------------------------------------
   const fetchFullScan = async (scanId) => {
     const token = localStorage.getItem("access_token");
 
@@ -59,9 +59,9 @@ function App() {
     }
   };
 
-  // ---------------------------------------------------
+  // ---------------------------------------
   // On Page Load
-  // ---------------------------------------------------
+  // ---------------------------------------
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
@@ -77,9 +77,9 @@ function App() {
     }
   }, []);
 
-  // ---------------------------------------------------
+  // ---------------------------------------
   // Exchange Code for Token
-  // ---------------------------------------------------
+  // ---------------------------------------
   const exchangeCodeForToken = async (code) => {
     try {
       const codeVerifier = localStorage.getItem("code_verifier");
@@ -114,9 +114,9 @@ function App() {
     }
   };
 
-  // ---------------------------------------------------
+  // ---------------------------------------
   // Fetch Scan History
-  // ---------------------------------------------------
+  // ---------------------------------------
   const fetchScans = async (token) => {
     setLoading(true);
     setError(null);
@@ -125,7 +125,6 @@ function App() {
       const response = await fetch(
         "http://localhost:9100/scan/history",
         {
-          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -146,9 +145,9 @@ function App() {
     }
   };
 
-  // ---------------------------------------------------
+  // ---------------------------------------
   // Logout
-  // ---------------------------------------------------
+  // ---------------------------------------
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("code_verifier");
@@ -157,9 +156,9 @@ function App() {
     setSelectedScan(null);
   };
 
-  // ---------------------------------------------------
+  // ---------------------------------------
   // Login Redirect
-  // ---------------------------------------------------
+  // ---------------------------------------
   const handleLogin = () => {
     const loginUrl =
       `${COGNITO_DOMAIN}/login?` +
@@ -173,9 +172,125 @@ function App() {
     window.location.href = loginUrl;
   };
 
-  // ---------------------------------------------------
+  // ---------------------------------------
+  // Render Sections
+  // ---------------------------------------
+
+  const sectionStyle = {
+    background: "#f5f5f5",
+    padding: "15px",
+    marginBottom: "20px",
+    borderRadius: "8px",
+  };
+
+  const tableStyle = {
+    width: "100%",
+    borderCollapse: "collapse",
+  };
+
+  const renderSystem = () => {
+    if (!selectedScan?.system) return null;
+    const sys = selectedScan.system;
+
+    return (
+      <div style={sectionStyle}>
+        <h3>🖥 System Information</h3>
+        <p><strong>OS:</strong> {sys.os}</p>
+        <p><strong>Release:</strong> {sys.os_release}</p>
+        <p><strong>Architecture:</strong> {sys.architecture}</p>
+        <p><strong>Processor:</strong> {sys.processor}</p>
+        <p><strong>Hostname:</strong> {sys.hostname}</p>
+        <p><strong>Python Version:</strong> {sys.python_version}</p>
+      </div>
+    );
+  };
+
+  const renderPython = () => {
+    if (!selectedScan?.python) return null;
+    const py = selectedScan.python;
+
+    return (
+      <div style={sectionStyle}>
+        <h3>🐍 Python</h3>
+        <p><strong>Python Version:</strong> {py.python_version}</p>
+
+        {py.packages?.length > 0 && (
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th>Package</th>
+                <th>Version</th>
+              </tr>
+            </thead>
+            <tbody>
+              {py.packages.map((pkg, index) => (
+                <tr key={index}>
+                  <td>{pkg.name}</td>
+                  <td>{pkg.version}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    );
+  };
+
+  const renderNode = () => {
+    if (!selectedScan?.node) return null;
+    const node = selectedScan.node;
+
+    return (
+      <div style={sectionStyle}>
+        <h3>🟢 Node</h3>
+        <p><strong>Node Version:</strong> {node.node_version || "Not Installed"}</p>
+        <p><strong>NPM Version:</strong> {node.npm_version || "Not Installed"}</p>
+      </div>
+    );
+  };
+
+  const renderDocker = () => {
+    if (!selectedScan?.docker) return null;
+    const docker = selectedScan.docker;
+
+    return (
+      <div style={sectionStyle}>
+        <h3>🐳 Docker</h3>
+        <p><strong>Installed:</strong> {docker.installed ? "Yes" : "No"}</p>
+        <p><strong>Version:</strong> {docker.version || "N/A"}</p>
+
+        {docker.images?.length > 0 && (
+          <ul>
+            {docker.images.map((img, index) => (
+              <li key={index}>{img}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
+
+  const renderCLI = () => {
+    if (!selectedScan?.cli_tools) return null;
+
+    return (
+      <div style={sectionStyle}>
+        <h3>🔧 CLI Tools</h3>
+        {Object.entries(selectedScan.cli_tools).map(([tool, data]) => (
+          <p key={tool}>
+            <strong>{tool}:</strong>{" "}
+            {data.installed
+              ? `Installed (${data.version})`
+              : "Not Installed"}
+          </p>
+        ))}
+      </div>
+    );
+  };
+
+  // ---------------------------------------
   // UI
-  // ---------------------------------------------------
+  // ---------------------------------------
   return (
     <div style={{ padding: "40px", fontFamily: "Arial" }}>
       <h1>Dev Environment Platform</h1>
@@ -186,10 +301,7 @@ function App() {
 
       {isLoggedIn && (
         <>
-          <button
-            onClick={handleLogout}
-            style={{ marginBottom: "20px" }}
-          >
+          <button onClick={handleLogout} style={{ marginBottom: "20px" }}>
             Logout
           </button>
 
@@ -228,9 +340,7 @@ function App() {
                   </div>
 
                   <button
-                    onClick={() =>
-                      fetchFullScan(scan.scan_id)
-                    }
+                    onClick={() => fetchFullScan(scan.scan_id)}
                     style={{ marginTop: "8px" }}
                   >
                     View Details
@@ -243,15 +353,11 @@ function App() {
           {selectedScan && (
             <div style={{ marginTop: "40px" }}>
               <h3>Full Scan Details</h3>
-              <pre
-                style={{
-                  background: "#f4f4f4",
-                  padding: "15px",
-                  overflowX: "auto",
-                }}
-              >
-                {JSON.stringify(selectedScan, null, 2)}
-              </pre>
+              {renderSystem()}
+              {renderPython()}
+              {renderNode()}
+              {renderDocker()}
+              {renderCLI()}
             </div>
           )}
         </>

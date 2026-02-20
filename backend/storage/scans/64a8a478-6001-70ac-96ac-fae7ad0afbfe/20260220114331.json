@@ -1,0 +1,23 @@
+{
+  "scan_id": "20260220114329",
+  "timestamp": "20260220114331",
+  "system": {
+    "os": "Windows",
+    "os_release": "10",
+    "os_version": "10.0.19045",
+    "architecture": "AMD64",
+    "processor": "Intel64 Family 6 Model 142 Stepping 9, GenuineIntel",
+    "hostname": "NTS-AvaniShinde",
+    "python_version": "3.11.9",
+    "platform": "Windows-10-10.0.19045-SP0"
+  },
+  "python": {
+    "python_version": "3.11.9",
+    "packages": []
+  },
+  "node": {},
+  "docker": {},
+  "cli_tools": {},
+  "metadata": {},
+  "developer_id": "64a8a478-6001-70ac-96ac-fae7ad0afbfe"
+}
