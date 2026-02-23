@@ -170,3 +170,11 @@ Displayed installed vs missing tools clearly to improve environment visibility.
 Rendered Python and Node packages in structured tables for better readability.
 Enhanced overall frontend clarity to make the app feel production-ready and user-friendly.
 
+### Event-Driven Architecture (Day 11)
+
+The backend now emits a `ScanUploaded` event to Amazon EventBridge after successfully storing scan data in S3 and metadata in DynamoDB.  
+This decouples scan ingestion from future processing logic.  
+Events are published to the default event bus using boto3.  
+This enables asynchronous workflows such as Lambda-based scoring and monitoring.  
+The platform is now transitioning into a production-style cloud-native architecture.
+
