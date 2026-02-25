@@ -1,7 +1,9 @@
 
 # Ignore local scan data only
 backend/app/storage/scans/
-
+STORAGE_BACKEND=s3
+AWS_REGION=us-east-1
+S3_BUCKET_NAME=dev-env-platform-scans-avani 
 # Ignore Python cache
 __pycache__/
 *.pyc
