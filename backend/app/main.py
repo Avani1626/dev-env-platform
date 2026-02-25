@@ -6,6 +6,12 @@ from .auth import verify_token
 from app.models.scan import ScanRequest
 from app.services.scan_service import ScanService
 from app.auth import verify_token
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+print("STORAGE_BACKEND VALUE:", os.getenv("STORAGE_BACKEND"))
 
 
 app = FastAPI(title="Dev Env Platform")
