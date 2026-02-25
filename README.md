@@ -178,3 +178,11 @@ Events are published to the default event bus using boto3.
 This enables asynchronous workflows such as Lambda-based scoring and monitoring.  
 The platform is now transitioning into a production-style cloud-native architecture.
 
+## Day 12 – Event-Driven Scan Processing
+
+Implemented AWS EventBridge and Lambda to process scans asynchronously after upload.
+Configured backend to store full scan data in S3 and metadata in DynamoDB.
+Created EventBridge rule to trigger Lambda on ScanUploaded events.
+Lambda fetches scan JSON from S3 and processes it successfully.
+Completed end-to-end cloud-native event-driven architecture.
+
