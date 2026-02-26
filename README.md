@@ -179,10 +179,14 @@ This enables asynchronous workflows such as Lambda-based scoring and monitoring.
 The platform is now transitioning into a production-style cloud-native architecture.
 
 ## Day 12 – Event-Driven Scan Processing
-
 Implemented AWS EventBridge and Lambda to process scans asynchronously after upload.
 Configured backend to store full scan data in S3 and metadata in DynamoDB.
 Created EventBridge rule to trigger Lambda on ScanUploaded events.
 Lambda fetches scan JSON from S3 and processes it successfully.
 Completed end-to-end cloud-native event-driven architecture.
-
+## Day 12 – Async Scan Processing with AWS Lambda
+Implemented event-driven scan processing using EventBridge → Lambda.
+Lambda fetches scan from S3, calculates score, and detects critical issues.
+Added scan lifecycle management (PENDING → PROCESSED / FAILED).
+Implemented failure handling with error persistence in DynamoDB.
+System is now fully asynchronous and production-style resilient.
