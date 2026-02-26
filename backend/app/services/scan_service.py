@@ -44,7 +44,7 @@ class ScanService:
         environment = scan_data.get("environment", {})
 
         summary = {
-            "status": "COMPLETED",
+            "status": "PENDING",
             "os": environment.get("os", "UNKNOWN"),
             "timestamp": timestamp,
         }
