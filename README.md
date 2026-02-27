@@ -190,3 +190,18 @@ Lambda fetches scan from S3, calculates score, and detects critical issues.
 Added scan lifecycle management (PENDING → PROCESSED / FAILED).
 Implemented failure handling with error persistence in DynamoDB.
 System is now fully asynchronous and production-style resilient.
+
+Day 13 – Production Monitoring (CloudWatch + SNS)
+Implemented full monitoring pipeline for scan failure detection.
+What was added:
+Custom CloudWatch metrics (ScanProcessed, ScanFailed)
+CloudWatch Alarm triggered when ScanFailed >= 1
+SNS Topic (scan-failure-alerts) for notifications
+Email alerts on scan failure
+Monitoring Flow:
+Lambda Failure
+→ CloudWatch Metric (ScanFailed)
+→ CloudWatch Alarm
+→ SNS Topic
+→ Email Notification
+This converts the system into a production-grade observable architecture.
