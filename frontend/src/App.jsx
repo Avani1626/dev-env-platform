@@ -1,4 +1,15 @@
 import { useEffect, useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from "recharts";
 
 // -------------------------------
 // Cognito Configuration
@@ -15,6 +26,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedScan, setSelectedScan] = useState(null);
+  const [summary, setSummary] = useState(null);
+  const [trends, setTrends] = useState(null);
 
   // ---------------------------------------
   // Format Timestamp for UI
@@ -33,14 +46,12 @@ function App() {
   };
 
   // ---------------------------------------
-  // Fetch Full Scan Details
+  // Fetch Dashboard Summary
   // ---------------------------------------
-  const fetchFullScan = async (scanId) => {
-    const token = localStorage.getItem("access_token");
-
+  const fetchSummary = async (token) => {
     try {
       const response = await fetch(
-        `http://localhost:9100/scan/${scanId}`,
+        "http://localhost:9100/metrics/summary",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -48,69 +59,31 @@ function App() {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch full scan");
-      }
-
       const data = await response.json();
-      setSelectedScan(data);
+      setSummary(data);
     } catch (err) {
-      console.error("Full scan fetch error:", err);
+      console.error("Summary fetch error:", err);
     }
   };
 
   // ---------------------------------------
-  // On Page Load
+  // Fetch Trends
   // ---------------------------------------
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
-
-    if (code) {
-      exchangeCodeForToken(code);
-    } else {
-      const token = localStorage.getItem("access_token");
-      if (token) {
-        setIsLoggedIn(true);
-        fetchScans(token);
-      }
-    }
-  }, []);
-
-  // ---------------------------------------
-  // Exchange Code for Token
-  // ---------------------------------------
-  const exchangeCodeForToken = async (code) => {
+  const fetchTrends = async (token) => {
     try {
-      const codeVerifier = localStorage.getItem("code_verifier");
-
-      const response = await fetch(`${COGNITO_DOMAIN}/oauth2/token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          grant_type: "authorization_code",
-          client_id: CLIENT_ID,
-          code: code,
-          redirect_uri: REDIRECT_URI,
-          code_verifier: codeVerifier,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:9100/metrics/trends",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error("Token exchange failed");
-      }
-
-      localStorage.setItem("access_token", data.access_token);
-      window.history.replaceState({}, document.title, "/");
-
-      setIsLoggedIn(true);
-      fetchScans(data.access_token);
+      setTrends(data);
     } catch (err) {
-      console.error("Token exchange error:", err);
+      console.error("Trends fetch error:", err);
     }
   };
 
@@ -131,10 +104,6 @@ function App() {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch scans");
-      }
-
       const data = await response.json();
       setScans(data);
     } catch (err) {
@@ -146,6 +115,61 @@ function App() {
   };
 
   // ---------------------------------------
+  // Exchange Code for Token
+  // ---------------------------------------
+  const exchangeCodeForToken = async (code) => {
+    try {
+      const codeVerifier = localStorage.getItem("code_verifier");
+
+      const response = await fetch(`${COGNITO_DOMAIN}/oauth2/token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
+          client_id: CLIENT_ID,
+          code,
+          redirect_uri: REDIRECT_URI,
+          code_verifier: codeVerifier,
+        }),
+      });
+
+      const data = await response.json();
+
+      localStorage.setItem("access_token", data.access_token);
+      window.history.replaceState({}, document.title, "/");
+
+      setIsLoggedIn(true);
+      fetchScans(data.access_token);
+      fetchSummary(data.access_token);
+      fetchTrends(data.access_token);
+    } catch (err) {
+      console.error("Token exchange error:", err);
+    }
+  };
+
+  // ---------------------------------------
+  // On Page Load
+  // ---------------------------------------
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+
+    if (code) {
+      exchangeCodeForToken(code);
+    } else {
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        setIsLoggedIn(true);
+        fetchScans(token);
+        fetchSummary(token);
+        fetchTrends(token);
+      }
+    }
+  }, []);
+
+  // ---------------------------------------
   // Logout
   // ---------------------------------------
   const handleLogout = () => {
@@ -153,12 +177,10 @@ function App() {
     localStorage.removeItem("code_verifier");
     setIsLoggedIn(false);
     setScans([]);
-    setSelectedScan(null);
+    setSummary(null);
+    setTrends(null);
   };
 
-  // ---------------------------------------
-  // Login Redirect
-  // ---------------------------------------
   const handleLogin = () => {
     const loginUrl =
       `${COGNITO_DOMAIN}/login?` +
@@ -173,193 +195,119 @@ function App() {
   };
 
   // ---------------------------------------
-  // Render Sections
+  // Transform trends for chart
   // ---------------------------------------
+  const chartData =
+    trends &&
+    Object.keys(trends.daily_scans).map((date) => ({
+      date,
+      scans: trends.daily_scans[date] || 0,
+      failures: trends.daily_failures[date] || 0,
+    }));
 
-  const sectionStyle = {
-    background: "#f5f5f5",
-    padding: "15px",
-    marginBottom: "20px",
-    borderRadius: "8px",
-  };
+  const MetricCard = ({ title, value }) => (
+    <div
+      style={{
+        background: "#f4f4f4",
+        padding: "20px",
+        borderRadius: "10px",
+        width: "200px",
+        textAlign: "center",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      }}
+    >
+      <h4>{title}</h4>
+      <p style={{ fontSize: "22px", fontWeight: "bold" }}>{value}</p>
+    </div>
+  );
 
-  const tableStyle = {
-    width: "100%",
-    borderCollapse: "collapse",
-  };
-
-  const renderSystem = () => {
-    if (!selectedScan?.system) return null;
-    const sys = selectedScan.system;
-
-    return (
-      <div style={sectionStyle}>
-        <h3>🖥 System Information</h3>
-        <p><strong>OS:</strong> {sys.os}</p>
-        <p><strong>Release:</strong> {sys.os_release}</p>
-        <p><strong>Architecture:</strong> {sys.architecture}</p>
-        <p><strong>Processor:</strong> {sys.processor}</p>
-        <p><strong>Hostname:</strong> {sys.hostname}</p>
-        <p><strong>Python Version:</strong> {sys.python_version}</p>
-      </div>
-    );
-  };
-
-  const renderPython = () => {
-    if (!selectedScan?.python) return null;
-    const py = selectedScan.python;
-
-    return (
-      <div style={sectionStyle}>
-        <h3>🐍 Python</h3>
-        <p><strong>Python Version:</strong> {py.python_version}</p>
-
-        {py.packages?.length > 0 && (
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th>Package</th>
-                <th>Version</th>
-              </tr>
-            </thead>
-            <tbody>
-              {py.packages.map((pkg, index) => (
-                <tr key={index}>
-                  <td>{pkg.name}</td>
-                  <td>{pkg.version}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    );
-  };
-
-  const renderNode = () => {
-    if (!selectedScan?.node) return null;
-    const node = selectedScan.node;
-
-    return (
-      <div style={sectionStyle}>
-        <h3>🟢 Node</h3>
-        <p><strong>Node Version:</strong> {node.node_version || "Not Installed"}</p>
-        <p><strong>NPM Version:</strong> {node.npm_version || "Not Installed"}</p>
-      </div>
-    );
-  };
-
-  const renderDocker = () => {
-    if (!selectedScan?.docker) return null;
-    const docker = selectedScan.docker;
-
-    return (
-      <div style={sectionStyle}>
-        <h3>🐳 Docker</h3>
-        <p><strong>Installed:</strong> {docker.installed ? "Yes" : "No"}</p>
-        <p><strong>Version:</strong> {docker.version || "N/A"}</p>
-
-        {docker.images?.length > 0 && (
-          <ul>
-            {docker.images.map((img, index) => (
-              <li key={index}>{img}</li>
-            ))}
-          </ul>
-        )}
-      </div>
-    );
-  };
-
-  const renderCLI = () => {
-    if (!selectedScan?.cli_tools) return null;
-
-    return (
-      <div style={sectionStyle}>
-        <h3>🔧 CLI Tools</h3>
-        {Object.entries(selectedScan.cli_tools).map(([tool, data]) => (
-          <p key={tool}>
-            <strong>{tool}:</strong>{" "}
-            {data.installed
-              ? `Installed (${data.version})`
-              : "Not Installed"}
-          </p>
-        ))}
-      </div>
-    );
-  };
-
-  // ---------------------------------------
-  // UI
-  // ---------------------------------------
   return (
     <div style={{ padding: "40px", fontFamily: "Arial" }}>
       <h1>Dev Environment Platform</h1>
 
-      {!isLoggedIn && (
-        <button onClick={handleLogin}>Login</button>
-      )}
+      {!isLoggedIn && <button onClick={handleLogin}>Login</button>}
 
       {isLoggedIn && (
         <>
-          <button onClick={handleLogout} style={{ marginBottom: "20px" }}>
-            Logout
-          </button>
+          <button onClick={handleLogout}>Logout</button>
 
-          <h2>Your Scan History</h2>
+          {/* Dashboard Cards */}
+          {summary && (
+            <div style={{ margin: "40px 0" }}>
+              <h2>Dashboard</h2>
+              <div style={{ display: "flex", gap: "20px" }}>
+                <MetricCard title="Total Scans" value={summary.total_scans} />
+                <MetricCard title="Processed" value={summary.processed} />
+                <MetricCard title="Failed" value={summary.failed} />
+                <MetricCard
+                  title="Average Score"
+                  value={summary.average_score}
+                />
+              </div>
+            </div>
+          )}
 
+          {/* Charts */}
+          {chartData && (
+            <>
+              <h2>Scan Trends</h2>
+              <div style={{ width: "100%", height: 300 }}>
+                <ResponsiveContainer>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="scans"
+                      stroke="#8884d8"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+
+              <h2 style={{ marginTop: "40px" }}>Failure Trends</h2>
+              <div style={{ width: "100%", height: 300 }}>
+                <ResponsiveContainer>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="failures" fill="#ff4d4f" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
+
+          {/* Scan History */}
+          <h2 style={{ marginTop: "40px" }}>Your Scan History</h2>
           {loading && <p>Loading scans...</p>}
           {error && <p style={{ color: "red" }}>{error}</p>}
 
-          {!loading && scans.length === 0 && (
-            <p>No scans found.</p>
-          )}
-
-          {!loading && scans.length > 0 && (
-            <ul>
-              {scans.map((scan) => (
-                <li key={scan.scan_id} style={{ marginBottom: "20px" }}>
-                  <div>
-                    <strong>Date:</strong>{" "}
-                    {formatDate(scan.timestamp)}
-                  </div>
-                  <div>
-                    <strong>Status:</strong>{" "}
-                    <span
-                      style={{
-                        color:
-                          scan.status === "PASS"
-                            ? "green"
-                            : "red",
-                      }}
-                    >
-                      {scan.status}
-                    </span>
-                  </div>
-                  <div>
-                    <strong>OS:</strong> {scan.os}
-                  </div>
-
-                  <button
-                    onClick={() => fetchFullScan(scan.scan_id)}
-                    style={{ marginTop: "8px" }}
-                  >
-                    View Details
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {selectedScan && (
-            <div style={{ marginTop: "40px" }}>
-              <h3>Full Scan Details</h3>
-              {renderSystem()}
-              {renderPython()}
-              {renderNode()}
-              {renderDocker()}
-              {renderCLI()}
+          {scans.map((scan) => (
+            <div key={scan.scan_id} style={{ marginBottom: "20px" }}>
+              <div>
+                <strong>Date:</strong> {formatDate(scan.timestamp)}
+              </div>
+              <div>
+                <strong>Status:</strong>{" "}
+                <span
+                  style={{
+                    color:
+                      scan.status === "COMPLETED" ? "green" : "red",
+                  }}
+                >
+                  {scan.status}
+                </span>
+              </div>
+              <div>
+                <strong>OS:</strong> {scan.os}
+              </div>
             </div>
-          )}
+          ))}
         </>
       )}
     </div>
