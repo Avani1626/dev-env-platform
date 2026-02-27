@@ -205,3 +205,11 @@ Lambda Failure
 → SNS Topic
 → Email Notification
 This converts the system into a production-grade observable architecture.
+
+📊 Day 14 – Dashboard & Analytics
+Implemented backend aggregation endpoints: /metrics/summary and /metrics/trends.
+Built KPI dashboard displaying total scans, processed, failed, and average score.
+Integrated Recharts to visualize daily scan trends and failure trends.
+Connected authenticated frontend API calls using Cognito JWT tokens.
+Upgraded the platform with a full analytics and visualization layer for SaaS-style monitoring.
+
